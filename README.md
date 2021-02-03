@@ -25,7 +25,7 @@ The goals / steps of this project are the following:
 
 ### Camera Calibration
 
-#### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
+#### STEP1) Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
 
 For this step, I implemented python codes in `camera_calibration.py`.   
 Basically, I defined the numbers of x points and y points to prepare object points.   
@@ -33,25 +33,37 @@ By assuming the chessboard is fixed on the (x, y) planed at z = 0, a replicated 
 
 Here are the compared images to show how different to apply `cv2.undistort` function.
 
-![alt text][image1]
-![alt text][image2]
+![alt text][image1]   
+`Distorted calibration image`   
+   
+![alt text][image2]   
+`Undistorted calibration image`   
+
 
 ### Pipeline (single images)
 
-#### 1. Provide an example of a distortion-corrected image.
+#### STEP2) Provide an example of a distortion-corrected image.
 
-To demonstrate this step, I will describe how I apply the distortion correction to one of the test images like this one:
-![alt text][image2]
+First of all, the pipeline implementation is in `single_image_pipeline.py`.   
+To see whether the distortion correction was calculated correctly, I applied `undistort` function with `mtx` and `dist` to the test images.   
+Below are an original image and the result of an undistorted test image.   
+An original image   
+![alt text][image3] 
 
-#### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
+The undistorted test image     
+![alt text][image4]   
 
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
+#### STEP3) Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
-![alt text][image3]
+I defined `abs_sobel_thresh`, `mag_thresh`, `dir_threshold`, and `color_threshold` in `threshold.py`.
+To apply thresholds, I choose `abs_sobel_thresh` with x-orient, `mag_thresh`, and `color_threshold` which is determined by only s channel in HLS.   
+Below is the result of processed binary.
 
-#### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
+![alt text][image5]
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
+#### STEP4) Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
+
+To apply a perspective transform to rectify the binary image, I defined `src` and `dst` hardcoded like below :
 
 ```python
 src = np.float32(
@@ -65,48 +77,44 @@ dst = np.float32(
     [(img_size[0] * 3 / 4), img_size[1]],
     [(img_size[0] * 3 / 4), 0]])
 ```
-
-This resulted in the following source and destination points:
-
-| Source        | Destination   | 
-|:-------------:|:-------------:| 
-| 585, 460      | 320, 0        | 
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
-
-I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
-
-![alt text][image4]
-
-#### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
-
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
-
-![alt text][image5]
-
-#### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
-
-I did this in lines # through # in my code in `my_other_file.py`
-
-#### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
-
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
-
+I got `M` and `Minv` parameters by using `getPerspectiveTransform` cv2 function. In this point, `M` is used to do the perspective transform in `warpPerspective` cv2 function.   
+Below is the result of warped image.  
+   
 ![alt text][image6]
+   
+#### STEP5) Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
+
+In this step, I implemented `line` class in `line.py`. `line` is to detect lane pixels and fit to find the lane boundary. `line` has three functions which are `find_lane_pixels`, `fit_polynomial` and `measure_curvature_pixels`. Firstly, I used `find_lane_pixels` to find pixels by detecting peak of the left and right halves of the historgram and moving the next left or right start points based on a mean value of good left or right indexes. After finding pixels, I fitted a second order polynomial by using `np.polyfit`. From this function, I got left and right fit x values, and y values.   
+Below is the result of the detected image.   
+
+![alt text][image7]
+
+#### STEP6) Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
+
+For this calculation, I defined `ym_per_pix` and `xm_per_pix` which represent meter per pixel in y or x dimension. The parameters are applied to calculate the radius of curvature of the lane. From `measure_curvature_pixels` function, I got `left_curverad` and `right_curverad`. In this project, I show only `left_curverad`. For calculating the position of the vehicle with respect to center, I subtract `camera_center` and `image cetner`. Of course, I apply `xm_per_pix`.
+
+#### STEP7) Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
+
+To draw the left and right lane, I used `fillPoly` cv2 function which draws a polygon based an array of (x,y). Therefore, I collected the left and right (x,y) arrays. I also collected the (x,y) array between the left and right lanes. It was filled with another color. After applying `fillPoly`, in this point, I utilized `Minv` to apply `warpPerspective` cv2 function and then I did `addWeighted` to overlap the lanes to the background.   
+
+Below is the result of tracked image through this pipeline!!   
+
+![alt text][image8]
 
 ---
 
 ### Pipeline (video)
 
-#### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
+#### Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
-Here's a [link to my video result](./project_video.mp4)
+Here is my final video output.
+[LINK](./tracked_project_video.mp4)
 
 ---
 
 ### Discussion
 
-#### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
+#### Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+I need to imporve the finding lane pixels' algorithm. I think that the results of the images look good, but the problem appears when I watch the result of the video. Relying on the brightness and curvation degree of the lanes, suddenly, I see the wrong detected lanes. The critical problem of this algorithm is how to find the next left and right start points. Currently, it just calculates the mean values. As I saw the Q&A video, I have to consider the convolution methods or another method to detect next start points well.
+   

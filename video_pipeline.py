@@ -86,11 +86,11 @@ def process_image(img):
     road_warped = cv2.warpPerspective(road,Minv,img_size,flags=cv2.INTER_LINEAR)
     road_warped_bkg = cv2.warpPerspective(road_bkg,Minv,img_size,flags=cv2.INTER_LINEAR)
 
-    # overlap the lanes and the background.
+    # Overlap the lanes to the background.
     base = cv2.addWeighted(img, 1.0, road_warped_bkg, -1.0, 0.0)
     result = cv2.addWeighted(base, 1.0, road_warped, 1.0, 0.0)
 
-    # STEP8) Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
+    # Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
 
     # I choose left curverad as a radius of curvature. 
     cv2.putText(result, 'Radius of Curvature = '+str(round(left_curverad,3))+'(m)',(50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)

@@ -97,7 +97,7 @@ for idx, fname in enumerate(images):
     base = cv2.addWeighted(img, 1.0, road_warped_bkg, -1.0, 0.0)
     result = cv2.addWeighted(base, 1.0, road_warped, 1.0, 0.0)
 
-    # STEP8) Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
+    # Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
 
     cv2.putText(result, 'Radius of Curvature = '+str(round(left_curverad,3))+'(m)',(50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
     cv2.putText(result, 'Vehicle is '+str(abs(round(center_diff,3)))+'m '+side_pos+' of center',(50,100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
