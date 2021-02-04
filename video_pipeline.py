@@ -12,6 +12,9 @@ dist_pickle = pickle.load(open("./calibration_pickle.p","rb"))
 mtx = dist_pickle["mtx"]
 dist = dist_pickle["dist"]
 
+# Global variable for line
+line_dec = line(nWindows = 9, Margin = 100, Minpix = 50)
+
 def process_image(img):
 
     # STEP2) Apply a distortion correction to raw images.
@@ -48,7 +51,6 @@ def process_image(img):
     warped = cv2.warpPerspective(thresholdedBinary,M,img_size,flags=cv2.INTER_LINEAR)
 
     # STEP5) Detect lane pixels and fit to find the lane boundary.
-    line_dec = line(nWindows = 9, Margin = 100, Minpix = 50)
     leftx, lefty, rightx, righty, out_img = line_dec.find_lane_pixels(warped)
     left_fitx, right_fitx, yvals, out_img = line_dec.fit_polynomial(warped, leftx, lefty, rightx, righty, out_img)
 
@@ -56,12 +58,15 @@ def process_image(img):
     # Choose the maximum y-value, corresponding to the bottom of the image and calculate the left curverad.
     # Define conversions in x and y from pixels space to meters
     ym_per_pix = 30/720 # meter per pixel in y dimension
-    xm_per_pix = 10/700 # meter per pixel in x dimension
+    xm_per_pix = 3.7/700 # meter per pixel in x dimension
     left_curverad, right_curverad = line_dec.measure_curvature_pixels(leftx, lefty, rightx, righty, yvals, ym_per_pix, xm_per_pix)
+
+    # Sanity Check
+    left_curverad, right_curverad, left_fitx, right_fitx = line_dec.sanity_check(left_curverad, right_curverad, left_fitx, right_fitx, xm_per_pix)
 
     # calculate the offset of the car on the road
     camera_center = (left_fitx[-1] + right_fitx[-1])/2
-    center_diff = (camera_center-warped.shape[1]/2)*xm_per_pix # 
+    center_diff = (camera_center-warped.shape[1]/2)*xm_per_pix 
     side_pos = 'left'
     if center_diff <= 0:
         side_pos = 'right'

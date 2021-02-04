@@ -68,8 +68,8 @@ for idx, fname in enumerate(images):
     # Choose the maximum y-value, corresponding to the bottom of the image and calculate the left curverad.
     # Define conversions in x and y from pixels space to meters
     ym_per_pix = 30/720 # meter per pixel in y dimension
-    xm_per_pix = 10/700 # meter per pixel in x dimension
-    left_curverad, right_curverad = line_dec.measure_curvature_pixels(leftx, lefty, rightx, righty, yvals, ym_per_pix, xm_per_pix)
+    xm_per_pix = 3.7/700 # meter per pixel in x dimension
+    left_curverad, right_curverad = line_dec.measure_curvature_pixels(leftx, lefty, rightx, righty, yvals, ym_per_pix, xm_per_pix)    
 
     # calculate the offset of the car on the road
     camera_center = (left_fitx[-1] + right_fitx[-1])/2

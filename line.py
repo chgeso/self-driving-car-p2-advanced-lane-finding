@@ -13,6 +13,18 @@ class line():
         # Set minimum number of pixels found to recenter window
         self.minpix = Minpix
 
+        # The previous left_curverad
+        self.left_curverad = None
+
+        # The previous right_curverad
+        self.right_curverad = None
+
+        # The previous left_fitx
+        self.left_fitx = None
+
+        # The previous right_fitx
+        self.right_fitx = None
+
     # Find Lane Pixels
     def find_lane_pixels(self, warped):
 
@@ -135,6 +147,36 @@ class line():
         right_curverad = ((1 + (2*right_fit_cr[0]*y_eval_right + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
 
         return left_curverad, right_curverad
+
+    def sanity_check(self, left_curverad, right_curverad, left_fitx, right_fitx, xm_per_pix):
+
+        # When self.left_curverad is None, it is the first frame.
+        # Therefore, I return just input arguments.
+        if self.left_curverad == None :
+            self.left_curverad = left_curverad
+            self.right_curverad = right_curverad
+            self.left_fitx = left_fitx
+            self.right_fitx = right_fitx
+            return left_curverad, right_curverad, left_fitx, right_fitx
+
+        prev_left_curverad = self.left_curverad
+        prev_right_curverad = self.right_curverad
+        prev_left_fitx = self.left_fitx
+        prev_right_fitx = self.right_fitx
+
+        # Firstly, left_curverad and right_curverad have to be less than 10000m.
+        # Secondly, the distance between the two polynomials should be aobut 3.7m
+        lane_distance1 = np.absolute(right_fitx[-1] - left_fitx[-1])*xm_per_pix
+        lane_distance2 = np.absolute(right_fitx[0] - left_fitx[0])*xm_per_pix
+        if (left_curverad < 10000) and (right_curverad < 10000) and (lane_distance1 < 3.7) and (lane_distance2 < 3.7) and (lane_distance1 > 3.0) and (lane_distance2 > 3.0):
+            self.left_curverad = left_curverad
+            self.right_curverad = right_curverad
+            self.left_fitx = left_fitx
+            self.right_fitx = right_fitx
+            return left_curverad, right_curverad, left_fitx, right_fitx
+        else:
+            return prev_left_curverad, prev_right_curverad, prev_left_fitx, prev_right_fitx
+
 
 
 

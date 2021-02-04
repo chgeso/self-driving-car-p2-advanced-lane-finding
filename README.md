@@ -91,7 +91,7 @@ Below is the result of the detected image.
 
 #### STEP6) Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-For this calculation, I defined `ym_per_pix` and `xm_per_pix` which represent meter per pixel in y or x dimension. The parameters are applied to calculate the radius of curvature of the lane. From `measure_curvature_pixels` function, I got `left_curverad` and `right_curverad`. In this project, I show only `left_curverad`. For calculating the position of the vehicle with respect to center, I subtract `camera_center` and `image cetner`. Of course, I apply `xm_per_pix`.
+For this calculation, I defined `ym_per_pix` and `xm_per_pix` which represent meter per pixel in y or x dimension. The parameters are applied to calculate the radius of curvature of the lane. From `measure_curvature_pixels` function, I got `left_curverad` and `right_curverad`. In this project, I show only `left_curverad`. For calculating the position of the vehicle with respect to center, I subtract `camera_center` and `image cetner`. Of course, I apply `xm_per_pix`. And then I did `sanity_check` for veryfing whether the calculated lane is correct or not.  
 
 #### STEP7) Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
 
